@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>تحديث أرقام المساهمين</title>
     
     <!-- Tailwind CSS -->
@@ -24,89 +24,140 @@
         * {
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Arabic", "Helvetica Neue", Arial, sans-serif;
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Arabic", "Helvetica Neue", Arial, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            background: radial-gradient(circle at top left, #f3f4f6, #e5e7eb, #d1d5db);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 16px;
             margin: 0;
+            position: relative;
+            overflow-x: hidden;
         }
 
-        .main-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 32px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12), 0 8px 24px rgba(0, 0, 0, 0.05);
-            padding: 32px;
-            max-width: 480px;
+        /* Apple-style background soft blobs */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(147, 197, 253, 0.4) 0%, rgba(255, 255, 255, 0) 70%);
+            top: -100px;
+            right: -100px;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        body::after {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(196, 181, 253, 0.3) 0%, rgba(255, 255, 255, 0) 70%);
+            bottom: -150px;
+            left: -150px;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        #root {
+            position: relative;
+            z-index: 10;
             width: 100%;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            max-width: 480px;
+        }
+
+        /* Glassmorphism Main Card */
+        .main-card {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(30px) saturate(210%);
+            -webkit-backdrop-filter: blur(30px) saturate(210%);
+            border-radius: 28px;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.08), 
+                        0 8px 32px rgba(0, 0, 0, 0.03), 
+                        inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+            padding: 28px 20px;
+            width: 100%;
+        }
+
+        /* Glassmorphism Sub-Cards */
+        .section-card {
+            background: rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.015);
         }
 
         .header {
             text-align: center;
-            margin-bottom: 32px;
+            margin-bottom: 24px;
         }
 
         .header h1 {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
-            color: #1c1c1e;
+            color: #1d1d1f;
             letter-spacing: -0.5px;
         }
 
         .header p {
-            color: #8e8e93;
-            font-size: 14px;
-            margin-top: 6px;
+            color: #6e6e73;
+            font-size: 13px;
+            margin-top: 4px;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 0px;
         }
 
         .form-label {
             display: block;
             font-size: 13px;
             font-weight: 600;
-            color: #1c1c1e;
-            margin-bottom: 6px;
+            color: #1d1d1f;
+            margin-bottom: 8px;
+            opacity: 0.95;
+            letter-spacing: -0.2px;
         }
 
+        /* Set to exactly 16px on mobile to prevent iOS webview auto-zoom */
         .form-control {
             width: 100%;
-            padding: 14px 16px;
-            border: 1.5px solid #e5e7eb;
-            border-radius: 16px;
-            font-size: 16px;
-            transition: all 0.2s ease;
-            background: #fafafa;
-            color: #1c1c1e;
+            padding: 12px 14px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            font-size: 16px; 
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            background: rgba(255, 255, 255, 0.6);
+            color: #1d1d1f;
         }
 
         .form-control:focus {
             outline: none;
-            border-color: #2b6e9e;
-            background: #ffffff;
-            box-shadow: 0 0 0 4px rgba(43, 110, 158, 0.1);
+            border-color: rgba(0, 113, 227, 0.5);
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 0 4px rgba(0, 125, 250, 0.12);
         }
 
         .form-control:disabled {
-            opacity: 0.6;
+            opacity: 0.5;
             cursor: not-allowed;
         }
 
         select.form-control {
             appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238e8e93' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%236e6e73' d='M6 8.5L1.5 4h9z'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
-            background-position: left 16px center;
-            padding-left: 40px;
+            background-position: left 14px center;
+            padding-left: 36px;
         }
 
         .phone-input-group {
@@ -116,8 +167,8 @@
         }
 
         .country-code {
-            flex: 0 0 120px;
-            min-width: 120px;
+            flex: 0 0 110px;
+            min-width: 110px;
         }
 
         .phone-number {
@@ -126,29 +177,30 @@
 
         .btn-save {
             width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #2b6e9e 0%, #1e4a6e 100%);
+            padding: 14px;
+            background: linear-gradient(135deg, #0071e3 0%, #005bb5 100%);
             color: white;
             border: none;
-            border-radius: 16px;
-            font-size: 16px;
+            border-radius: 14px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(43, 110, 158, 0.3);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 14px rgba(0, 113, 227, 0.2);
         }
 
         .btn-save:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(43, 110, 158, 0.4);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0, 113, 227, 0.3);
         }
 
         .btn-save:active:not(:disabled) {
-            transform: scale(0.98);
+            transform: translateY(1px);
+            box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
         }
 
         .btn-save:disabled {
-            opacity: 0.6;
+            opacity: 0.5;
             cursor: not-allowed;
             transform: none;
         }
@@ -159,8 +211,8 @@
 
         .spinner {
             display: none;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-top: 2px solid white;
             border-radius: 50%;
@@ -179,25 +231,28 @@
             left: 50%;
             transform: translateX(-50%);
             padding: 12px 24px;
-            border-radius: 16px;
+            border-radius: 14px;
             font-size: 14px;
             font-weight: 500;
             color: white;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-            animation: slideUp 0.4s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            backdrop-filter: blur(8px);
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             z-index: 1000;
+            max-width: 90%;
+            text-align: center;
         }
 
         .toast-success {
-            background: #2b7a48;
+            background: rgba(52, 199, 89, 0.95);
         }
 
         .toast-error {
-            background: #bc3f2e;
+            background: rgba(255, 59, 48, 0.95);
         }
 
         .toast-info {
-            background: #2b6e9e;
+            background: rgba(0, 122, 255, 0.95);
         }
 
         @keyframes slideUp {
@@ -205,53 +260,114 @@
             to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
 
-        .search-box {
-            position: relative;
-        }
-
-        .search-box input {
-            padding-right: 44px;
-        }
-
-        .search-icon {
-            position: absolute;
-            right: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #8e8e93;
-            font-size: 18px;
-        }
-
         .current-phone {
             display: inline-block;
-            padding: 4px 12px;
-            background: #e8f0fe;
-            color: #2b6e9e;
-            border-radius: 20px;
+            padding: 4px 10px;
+            background: rgba(0, 113, 227, 0.08);
+            color: #0071e3;
+            border-radius: 8px;
             font-size: 12px;
             font-weight: 500;
-            margin-top: 4px;
+            margin-top: 6px;
         }
 
         .divider {
             height: 1px;
-            background: #e5e7eb;
-            margin: 24px 0;
+            background: rgba(0, 0, 0, 0.08);
+            margin: 16px 0;
         }
 
         .member-count {
-            color: #8e8e93;
+            color: #6e6e73;
             font-size: 13px;
             text-align: center;
-            padding: 8px;
-            background: #f8f9fc;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.03);
             border-radius: 12px;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+
+        .user-badge {
+            display: inline-block;
+            padding: 4px 14px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 20px;
+            font-size: 11px;
+            color: #1d1d1f;
             margin-top: 8px;
         }
 
+        /* Login Screen Styles */
+        .login-card {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(30px) saturate(210%);
+            -webkit-backdrop-filter: blur(30px) saturate(210%);
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 32px 24px;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.08);
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 14px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.7);
+            transition: all 0.25s ease;
+            color: #1d1d1f;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: rgba(0, 113, 227, 0.4);
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 0 0 4px rgba(0, 125, 250, 0.08);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #0071e3 0%, #005bb5 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 14px rgba(0, 113, 227, 0.2);
+        }
+
+        .login-btn:active {
+            transform: scale(0.98);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .login-error {
+            background: rgba(255, 59, 48, 0.1);
+            color: #ff3b30;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            text-align: center;
+            border: 1px solid rgba(255, 59, 48, 0.15);
+            margin-bottom: 16px;
+        }
+
+        /* Mobile Responsive */
         @media (max-width: 480px) {
             .main-card {
-                padding: 20px;
+                padding: 20px 14px;
                 border-radius: 24px;
             }
 
@@ -264,6 +380,51 @@
                 flex: 1;
                 min-width: unset;
             }
+
+            .section-card {
+                padding: 14px 12px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .login-card {
+                padding: 24px 16px;
+                border-radius: 24px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .main-card {
+                padding: 16px 10px;
+            }
+
+            .section-card {
+                padding: 12px 10px;
+            }
+
+            .form-control {
+                padding: 10px 12px;
+                font-size: 14px;
+            }
+
+            .btn-save {
+                padding: 12px;
+                font-size: 14px;
+            }
+        }
+
+        /* Loading shimmer effect */
+        .loading-shimmer {
+            animation: shimmer 1.5s infinite;
+            background: linear-gradient(90deg, rgba(255,255,255,0.3) 25%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.3) 75%);
+            background-size: 200% 100%;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
     </style>
 </head>
@@ -300,46 +461,46 @@
         // 📞 رموز الدول - قائمة شاملة
         // ============================================================
         const COUNTRY_CODES = [
-            { code: '+966', country: '🇸🇦 السعودية', flag: '🇸🇦' },
-            { code: '+967', country: '🇾🇪 اليمن', flag: '🇾🇪' },
-            { code: '+971', country: '🇦🇪 الإمارات', flag: '🇦🇪' },
-            { code: '+974', country: '🇶🇦 قطر', flag: '🇶🇦' },
-            { code: '+968', country: '🇴🇲 عمان', flag: '🇴🇲' },
-            { code: '+965', country: '🇰🇼 الكويت', flag: '🇰🇼' },
-            { code: '+973', country: '🇧🇭 البحرين', flag: '🇧🇭' },
-            { code: '+962', country: '🇯🇴 الأردن', flag: '🇯🇴' },
-            { code: '+20', country: '🇪🇬 مصر', flag: '🇪🇬' },
-            { code: '+90', country: '🇹🇷 تركيا', flag: '🇹🇷' },
-            { code: '+1', country: '🇺🇸 الولايات المتحدة', flag: '🇺🇸' },
-            { code: '+44', country: '🇬🇧 بريطانيا', flag: '🇬🇧' },
-            { code: '+49', country: '🇩🇪 ألمانيا', flag: '🇩🇪' },
-            { code: '+33', country: '🇫🇷 فرنسا', flag: '🇫🇷' },
-            { code: '+61', country: '🇦🇺 أستراليا', flag: '🇦🇺' },
-            { code: '+81', country: '🇯🇵 اليابان', flag: '🇯🇵' },
-            { code: '+86', country: '🇨🇳 الصين', flag: '🇨🇳' },
-            { code: '+91', country: '🇮🇳 الهند', flag: '🇮🇳' },
-            { code: '+55', country: '🇧🇷 البرازيل', flag: '🇧🇷' },
-            { code: '+7', country: '🇷🇺 روسيا', flag: '🇷🇺' },
-            { code: '+34', country: '🇪🇸 إسبانيا', flag: '🇪🇸' },
-            { code: '+39', country: '🇮🇹 إيطاليا', flag: '🇮🇹' },
-            { code: '+27', country: '🇿🇦 جنوب أفريقيا', flag: '🇿🇦' },
-            { code: '+234', country: '🇳🇬 نيجيريا', flag: '🇳🇬' },
-            { code: '+92', country: '🇵🇰 باكستان', flag: '🇵🇰' },
-            { code: '+880', country: '🇧🇩 بنغلاديش', flag: '🇧🇩' },
-            { code: '+60', country: '🇲🇾 ماليزيا', flag: '🇲🇾' },
-            { code: '+63', country: '🇵🇭 الفلبين', flag: '🇵🇭' },
-            { code: '+84', country: '🇻🇳 فيتنام', flag: '🇻🇳' },
-            { code: '+82', country: '🇰🇷 كوريا الجنوبية', flag: '🇰🇷' },
-            { code: '+52', country: '🇲🇽 المكسيك', flag: '🇲🇽' },
-            { code: '+31', country: '🇳🇱 هولندا', flag: '🇳🇱' },
-            { code: '+32', country: '🇧🇪 بلجيكا', flag: '🇧🇪' },
-            { code: '+41', country: '🇨🇭 سويسرا', flag: '🇨🇭' },
-            { code: '+46', country: '🇸🇪 السويد', flag: '🇸🇪' },
-            { code: '+47', country: '🇳🇴 النرويج', flag: '🇳🇴' },
-            { code: '+45', country: '🇩🇰 الدنمارك', flag: '🇩🇰' },
-            { code: '+358', country: '🇫🇮 فنلندا', flag: '🇫🇮' },
-            { code: '+48', country: '🇵🇱 بولندا', flag: '🇵🇱' },
-            { code: '+30', country: '🇬🇷 اليونان', flag: '🇬🇷' },
+            { code: '+966', country: '🇸🇦 السعودية' },
+            { code: '+967', country: '🇾🇪 اليمن' },
+            { code: '+971', country: '🇦🇪 الإمارات' },
+            { code: '+974', country: '🇶🇦 قطر' },
+            { code: '+968', country: '🇴🇲 عمان' },
+            { code: '+965', country: '🇰🇼 الكويت' },
+            { code: '+973', country: '🇧🇭 البحرين' },
+            { code: '+962', country: '🇯🇴 الأردن' },
+            { code: '+20', country: '🇪🇬 مصر' },
+            { code: '+90', country: '🇹🇷 تركيا' },
+            { code: '+1', country: '🇺🇸 الولايات المتحدة' },
+            { code: '+44', country: '🇬🇧 بريطانيا' },
+            { code: '+49', country: '🇩🇪 ألمانيا' },
+            { code: '+33', country: '🇫🇷 فرنسا' },
+            { code: '+61', country: '🇦🇺 أستراليا' },
+            { code: '+81', country: '🇯🇵 اليابان' },
+            { code: '+86', country: '🇨🇳 الصين' },
+            { code: '+91', country: '🇮🇳 الهند' },
+            { code: '+55', country: '🇧🇷 البرازيل' },
+            { code: '+7', country: '🇷🇺 روسيا' },
+            { code: '+34', country: '🇪🇸 إسبانيا' },
+            { code: '+39', country: '🇮🇹 إيطاليا' },
+            { code: '+27', country: '🇿🇦 جنوب أفريقيا' },
+            { code: '+234', country: '🇳🇬 نيجيريا' },
+            { code: '+92', country: '🇵🇰 باكستان' },
+            { code: '+880', country: '🇧🇩 بنغلاديش' },
+            { code: '+60', country: '🇲🇾 ماليزيا' },
+            { code: '+63', country: '🇵🇭 الفلبين' },
+            { code: '+84', country: '🇻🇳 فيتنام' },
+            { code: '+82', country: '🇰🇷 كوريا الجنوبية' },
+            { code: '+52', country: '🇲🇽 المكسيك' },
+            { code: '+31', country: '🇳🇱 هولندا' },
+            { code: '+32', country: '🇧🇪 بلجيكا' },
+            { code: '+41', country: '🇨🇭 سويسرا' },
+            { code: '+46', country: '🇸🇪 السويد' },
+            { code: '+47', country: '🇳🇴 النرويج' },
+            { code: '+45', country: '🇩🇰 الدنمارك' },
+            { code: '+358', country: '🇫🇮 فنلندا' },
+            { code: '+48', country: '🇵🇱 بولندا' },
+            { code: '+30', country: '🇬🇷 اليونان' },
         ];
 
         // ============================================================
@@ -351,7 +512,7 @@
             const [loading, setLoading] = useState(true);
             const [saving, setSaving] = useState(false);
             const [selectedDonor, setSelectedDonor] = useState('');
-            const [selectedCountry, setSelectedCountry] = useState('+966'); // السعودية افتراضياً
+            const [selectedCountry, setSelectedCountry] = useState('+966');
             const [phoneNumber, setPhoneNumber] = useState('');
             const [searchTerm, setSearchTerm] = useState('');
             const [toast, setToast] = useState(null);
@@ -367,7 +528,7 @@
             // ===== عرض رسائل الإشعارات =====
             const showToast = (message, type = 'info') => {
                 setToast({ message, type });
-                setTimeout(() => setToast(null), 3000);
+                setTimeout(() => setToast(null), 3500);
             };
 
             // ===== جلب بيانات المساهمين من Firestore =====
@@ -398,7 +559,7 @@
                     },
                     (error) => {
                         console.error('خطأ في جلب المساهمين:', error);
-                        showToast('حدث خطأ في تحميل البيانات', 'error');
+                        showToast('❌ حدث خطأ في تحميل البيانات', 'error');
                         setLoading(false);
                     }
                 );
@@ -435,13 +596,13 @@
             // ===== حفظ رقم الهاتف =====
             const savePhoneNumber = async () => {
                 if (!selectedDonor) {
-                    showToast('الرجاء اختيار مساهم أولاً', 'error');
+                    showToast('⚠️ الرجاء اختيار مساهم أولاً', 'error');
                     return;
                 }
 
                 const fullNumber = selectedCountry + phoneNumber.trim();
                 if (phoneNumber.trim().length < 6) {
-                    showToast('الرجاء إدخال رقم هاتف صحيح (6 أرقام على الأقل)', 'error');
+                    showToast('⚠️ الرجاء إدخال رقم هاتف صحيح (6 أرقام على الأقل)', 'error');
                     return;
                 }
 
@@ -449,7 +610,7 @@
                 try {
                     const donor = donors.find(d => d.id === selectedDonor);
                     if (!donor) {
-                        showToast('المساهم غير موجود', 'error');
+                        showToast('❌ المساهم غير موجود', 'error');
                         return;
                     }
 
@@ -511,7 +672,7 @@
             const handleLogin = async () => {
                 const email = loginEmail.trim();
                 if (!email || !loginPassword) {
-                    setLoginError('يرجى إدخال الإيميل وكلمة المرور');
+                    setLoginError('⚠️ يرجى إدخال الإيميل وكلمة المرور');
                     return;
                 }
 
@@ -546,7 +707,9 @@
                     console.error('خطأ تسجيل الدخول:', error);
                     let message = error.message || 'تعذر تسجيل الدخول';
                     if (error.code === 'auth/invalid-login-credentials') {
-                        message = 'الإيميل أو كلمة المرور غير صحيحة';
+                        message = '❌ الإيميل أو كلمة المرور غير صحيحة';
+                    } else if (error.code === 'auth/too-many-requests') {
+                        message = '⚠️ تم حظر الحساب مؤقتاً بسبب كثرة المحاولات';
                     }
                     setLoginError(message);
                 } finally {
@@ -597,58 +760,55 @@
             // 🔐 شاشة تسجيل الدخول
             if (showLogin) {
                 return (
-                    <div className="min-h-screen flex items-center justify-center p-4" style={{
-                        background: 'linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%)'
-                    }}>
-                        <div className="bg-white rounded-3xl p-8 w-full max-w-sm shadow-xl border-t-4 border-[#2b6e9e]">
-                            <div className="text-center mb-6">
-                                <h2 className="text-2xl font-bold text-[#1c1c1e]">🔐 تسجيل الدخول</h2>
-                                <p className="text-[#8e8e93] text-sm mt-1">تحديث أرقام المساهمين</p>
+                    <div className="min-h-screen flex items-center justify-center p-4">
+                        <div className="login-card">
+                            <div className="text-center mb-8">
+                                <div className="text-4xl mb-2">📞</div>
+                                <h2 className="text-2xl font-bold text-[#1d1d1f]">تسجيل الدخول</h2>
+                                <p className="text-[#6e6e73] text-sm mt-1">تحديث أرقام المساهمين</p>
                             </div>
 
                             {loginError && (
-                                <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm text-center mb-4">
+                                <div className="login-error">
                                     {loginError}
                                 </div>
                             )}
 
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-[#6c6c70] mb-1">الإيميل</label>
+                                    <label className="block text-xs font-semibold text-[#1d1d1f] mb-1.5">الإيميل</label>
                                     <input
                                         type="email"
+                                        className="login-input"
                                         value={loginEmail}
                                         onChange={e => setLoginEmail(e.target.value)}
                                         onKeyPress={e => e.key === 'Enter' && handleLogin()}
                                         placeholder="أدخل إيميل المشرف"
-                                        className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2b6e9e]"
+                                        autoComplete="email"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-[#6c6c70] mb-1">كلمة المرور</label>
+                                    <label className="block text-xs font-semibold text-[#1d1d1f] mb-1.5">كلمة المرور</label>
                                     <input
                                         type="password"
+                                        className="login-input"
                                         value={loginPassword}
                                         onChange={e => setLoginPassword(e.target.value)}
                                         onKeyPress={e => e.key === 'Enter' && handleLogin()}
                                         placeholder="أدخل كلمة المرور"
-                                        className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2b6e9e]"
+                                        autoComplete="current-password"
                                     />
                                 </div>
                                 <button
                                     onClick={handleLogin}
                                     disabled={isLoginLoading}
-                                    className="w-full py-3 rounded-xl font-medium text-white transition-all"
-                                    style={{
-                                        background: 'linear-gradient(135deg, #2b6e9e 0%, #1e4a6e 100%)',
-                                        boxShadow: '0 4px 12px rgba(43, 110, 158, 0.3)'
-                                    }}
+                                    className="login-btn"
                                 >
-                                    {isLoginLoading ? 'جاري الدخول...' : 'تسجيل الدخول'}
+                                    {isLoginLoading ? '⏳ جاري الدخول...' : '🔓 تسجيل الدخول'}
                                 </button>
                             </div>
 
-                            <div className="mt-6 pt-4 border-t text-center">
+                            <div className="mt-8 pt-4 border-t border-black/5 text-center">
                                 <p className="text-[10px] text-[#8e8e93]">🔒 نظام آمن - مخصص للمشرفين فقط</p>
                             </div>
                         </div>
@@ -665,92 +825,111 @@
                     <div className="header">
                         <h1>📞 تحديث أرقام المساهمين</h1>
                         <p>اختر المساهم وأضف رقم هاتفه</p>
-                        <div className="mt-2 text-xs text-[#8e8e93] bg-[#f5f5f7] p-2 rounded-xl">
+                        <div className="user-badge">
                             👤 {currentUser?.name} · {currentUser?.role}
                         </div>
                     </div>
 
-                    {/* ===== شريط البحث ===== */}
-                    <div className="form-group search-box">
-                        <span className="search-icon">🔍</span>
-                        <input
-                            type="text"
-                            placeholder="ابحث باسم المساهم..."
-                            value={searchTerm}
-                            onChange={e => setSearchTerm(e.target.value)}
-                            className="form-control"
-                            style={{ paddingRight: '44px' }}
-                        />
-                    </div>
-
-                    {/* ===== قائمة المساهمين ===== */}
-                    <div className="form-group">
-                        <label className="form-label">👤 اختيار المساهم</label>
-                        <select
-                            className="form-control"
-                            value={selectedDonor}
-                            onChange={handleDonorSelect}
-                            disabled={loading || donors.length === 0}
-                        >
-                            <option value="">-- اختر مساهماً --</option>
-                            {filteredDonors.map(donor => (
-                                <option key={donor.id} value={donor.id}>
-                                    {donor.name || 'بدون اسم'}
-                                    {donor.whatsappNumber && ` 📱${donor.whatsappNumber}`}
-                                </option>
-                            ))}
-                        </select>
-
-                        {selectedDonorData && currentPhone && (
-                            <div className="mt-2">
-                                <span className="current-phone">
-                                    📱 الرقم الحالي: {currentPhone}
-                                </span>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* ===== حقل رقم الهاتف ===== */}
-                    <div className="form-group">
-                        <label className="form-label">📱 رقم الهاتف</label>
-                        <div className="phone-input-group">
-                            <select
-                                className="form-control country-code"
-                                value={selectedCountry}
-                                onChange={e => setSelectedCountry(e.target.value)}
-                            >
-                                {COUNTRY_CODES.map(country => (
-                                    <option key={country.code} value={country.code}>
-                                        {country.flag} {country.code}
-                                    </option>
-                                ))}
-                            </select>
+                    {/* ===== بطاقة البحث ===== */}
+                    <div className="section-card">
+                        <label className="form-label">🔍 البحث السريع</label>
+                        <div className="form-group">
                             <input
-                                type="tel"
-                                className="form-control phone-number"
-                                placeholder="أدخل رقم الهاتف (مثال: 501234567)"
-                                value={phoneNumber}
-                                onChange={e => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
-                                dir="ltr"
-                                style={{ textAlign: 'left' }}
+                                type="text"
+                                className="form-control"
+                                placeholder="ابحث باسم المساهم للفلترة..."
+                                value={searchTerm}
+                                onChange={e => setSearchTerm(e.target.value)}
                             />
                         </div>
-                        <div className="text-xs text-[#8e8e93] mt-1">
-                            سيتم حفظ الرقم كاملاً: {selectedCountry}{phoneNumber || '___________'}
+                    </div>
+
+                    {/* ===== بطاقة اختيار المساهم ===== */}
+                    <div className="section-card">
+                        <label className="form-label">👤 اختيار المساهم</label>
+                        <div className="form-group">
+                            <select
+                                className="form-control"
+                                value={selectedDonor}
+                                onChange={handleDonorSelect}
+                                disabled={loading || donors.length === 0}
+                            >
+                                <option value="">-- اختر مساهماً من القائمة --</option>
+                                {loading ? (
+                                    <option value="" disabled>⏳ جاري التحميل...</option>
+                                ) : filteredDonors.length === 0 ? (
+                                    <option value="" disabled>📭 لا يوجد مساهمين</option>
+                                ) : (
+                                    filteredDonors.map(donor => (
+                                        <option key={donor.id} value={donor.id}>
+                                            {donor.name || 'بدون اسم'}
+                                            {donor.whatsappNumber && ` 📱 ${donor.whatsappNumber}`}
+                                        </option>
+                                    ))
+                                )}
+                            </select>
+
+                            {selectedDonorData && currentPhone && (
+                                <div className="mt-2">
+                                    <span className="current-phone">
+                                        📱 الرقم الحالي: {currentPhone}
+                                    </span>
+                                </div>
+                            )}
                         </div>
                     </div>
 
-                    {/* ===== عدد المساهمين ===== */}
+                    {/* ===== بطاقة رقم الهاتف الجديد ===== */}
+                    <div className="section-card">
+                        <label className="form-label">📱 رقم الهاتف الجديد</label>
+                        <div className="form-group">
+                            <div className="phone-input-group">
+                                <select
+                                    className="form-control country-code"
+                                    value={selectedCountry}
+                                    onChange={e => setSelectedCountry(e.target.value)}
+                                >
+                                    {COUNTRY_CODES.map(country => (
+                                        <option key={country.code} value={country.code}>
+                                            {country.country} {country.code}
+                                        </option>
+                                    ))}
+                                </select>
+                                <input
+                                    type="tel"
+                                    className="form-control phone-number"
+                                    placeholder="أدخل رقم الهاتف الجديد (مثال: 501234567)"
+                                    value={phoneNumber}
+                                    onChange={e => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
+                                    dir="ltr"
+                                    style={{ textAlign: 'left' }}
+                                />
+                            </div>
+                            <div className="text-[11px] text-[#6e6e73] mt-2.5">
+                                📌 الصيغة النهائية للحفظ: 
+                                <span className="font-semibold select-all text-[#1d1d1f]" dir="ltr">
+                                    {selectedCountry}{phoneNumber || '___________'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ===== إحصائيات ===== */}
                     <div className="member-count">
-                        📊 إجمالي المساهمين: {donors.length} · 
-                        {filteredDonors.length !== donors.length && ` تم تصفية: ${filteredDonors.length}`}
+                        📊 إجمالي المساهمين: {donors.length}
+                        {filteredDonors.length !== donors.length && ` · 🔍 المصفاة: ${filteredDonors.length}`}
+                        {selectedDonor && selectedDonorData && (
+                            <span className="block mt-1 text-[11px] text-[#0071e3]">
+                                ✅ تم اختيار: {selectedDonorData.name}
+                            </span>
+                        )}
                     </div>
 
                     {/* ===== زر الحفظ ===== */}
                     <button
                         className="btn-save"
                         onClick={savePhoneNumber}
-                        disabled={saving || !selectedDonor}
+                        disabled={saving || !selectedDonor || loading}
                     >
                         {saving ? (
                             <>
@@ -765,10 +944,12 @@
                     {/* ===== معلومات إضافية ===== */}
                     <div className="divider"></div>
 
-                    <div className="text-center text-xs text-[#8e8e93] space-y-1">
-                        <p>✨ سيتم تحديث الرقم في لوحة التحكم الرئيسية</p>
-                        <p>📌 يمكن إرسال رسائل واتساب للمساهمين بعد تحديث الرقم</p>
-                        <p className="text-[10px] text-[#c6c6c8]">تطوير: عمرو مسعد الشجاع</p>
+                    <div className="text-center text-xs text-[#6e6e73] space-y-1.5 opacity-90">
+                        <p>✨ سيتم تحديث الرقم تلقائياً في لوحة التحكم الرئيسية</p>
+                        <p>📤 يمكنك إرسال رسائل واتساب للمساهم بعد تحديث البيانات</p>
+                        <p className="text-[10px] text-[#8e8e93] pt-1 border-t border-black/5 mt-2">
+                            ⚡ تطوير: عمرو مسعد الشجاع
+                        </p>
                     </div>
 
                     {/* ===== رسائل الإشعارات ===== */}
@@ -792,10 +973,14 @@
             } catch (error) {
                 console.error("خطأ في التصيير:", error);
                 rootElement.innerHTML = `
-                    <div style="padding: 40px; text-align: center; font-family: Arial, sans-serif;">
-                        <h2 style="color: #bc3f2e;">❌ حدث خطأ في تحميل التطبيق</h2>
-                        <p style="color: #666; margin-top: 10px;">يرجى تحديث الصفحة</p>
-                        <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 30px; background: #2b6e9e; color: white; border: none; border-radius: 8px; cursor: pointer;">تحديث</button>
+                    <div style="padding: 40px 20px; text-align: center; font-family: -apple-system, sans-serif; background: white; border-radius: 24px; box-shadow: 0 8px 32px rgba(0,0,0,0.08); max-width: 400px; margin: 0 auto;">
+                        <div style="font-size: 48px; margin-bottom: 16px;">❌</div>
+                        <h2 style="color: #ff3b30; font-size: 20px; font-weight: 700; margin-bottom: 8px;">حدث خطأ في تحميل التطبيق</h2>
+                        <p style="color: #6e6e73; font-size: 14px; margin-bottom: 20px;">يرجى تحديث الصفحة أو المحاولة لاحقاً</p>
+                        <button onclick="location.reload()" style="padding: 12px 32px; background: #0071e3; color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(0,113,227,0.3);">
+                            🔄 تحديث الصفحة
+                        </button>
+                        <p style="color: #8e8e93; font-size: 11px; margin-top: 16px;">${error.message || ''}</p>
                     </div>
                 `;
             }
