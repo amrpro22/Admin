@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>تحديث أرقام المساهمين</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel Standalone -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Arabic", "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .main-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12), 0 8px 24px rgba(0, 0, 0, 0.05);
+            padding: 32px;
+            max-width: 480px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1c1c1e;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            color: #8e8e93;
+            font-size: 14px;
+            margin-top: 6px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #1c1c1e;
+            margin-bottom: 6px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 16px;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            background: #fafafa;
+            color: #1c1c1e;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #2b6e9e;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(43, 110, 158, 0.1);
+        }
+
+        .form-control:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238e8e93' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 16px center;
+            padding-left: 40px;
+        }
+
+        .phone-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+        }
+
+        .country-code {
+            flex: 0 0 120px;
+            min-width: 120px;
+        }
+
+        .phone-number {
+            flex: 1;
+        }
+
+        .btn-save {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #2b6e9e 0%, #1e4a6e 100%);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(43, 110, 158, 0.3);
+        }
+
+        .btn-save:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(43, 110, 158, 0.4);
+        }
+
+        .btn-save:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        .btn-save:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-save:disabled .spinner {
+            display: inline-block;
+        }
+
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 24px;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 500;
+            color: white;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.4s ease;
+            z-index: 1000;
+        }
+
+        .toast-success {
+            background: #2b7a48;
+        }
+
+        .toast-error {
+            background: #bc3f2e;
+        }
+
+        .toast-info {
+            background: #2b6e9e;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            padding-right: 44px;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8e8e93;
+            font-size: 18px;
+        }
+
+        .current-phone {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #e8f0fe;
+            color: #2b6e9e;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        .divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 24px 0;
+        }
+
+        .member-count {
+            color: #8e8e93;
+            font-size: 13px;
+            text-align: center;
+            padding: 8px;
+            background: #f8f9fc;
+            border-radius: 12px;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 480px) {
+            .main-card {
+                padding: 20px;
+                border-radius: 24px;
+            }
+
+            .phone-input-group {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .country-code {
+                flex: 1;
+                min-width: unset;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, useCallback } = React;
+
+        // ============================================================
+        // 🔥 إعدادات Firebase (نفس إعدادات لوحة التحكم)
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBupAOs6diz9ET8lGnMdyKjS_cMS8sA2Uc",
+            authDomain: "amr4admin.firebaseapp.com",
+            databaseURL: "https://amr4admin-default-rtdb.firebaseio.com",
+            projectId: "amr4admin",
+            storageBucket: "amr4admin.firebasestorage.app",
+            messagingSenderId: "177280788092",
+            appId: "1:177280788092:web:44f16c8f585a5b3e484bf9"
+        };
+
+        // تهيئة Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        const APP_PATH = "amr4admin";
+
+        // ============================================================
+        // 📞 رموز الدول - قائمة شاملة
+        // ============================================================
+        const COUNTRY_CODES = [
+            { code: '+966', country: '🇸🇦 السعودية', flag: '🇸🇦' },
+            { code: '+967', country: '🇾🇪 اليمن', flag: '🇾🇪' },
+            { code: '+971', country: '🇦🇪 الإمارات', flag: '🇦🇪' },
+            { code: '+974', country: '🇶🇦 قطر', flag: '🇶🇦' },
+            { code: '+968', country: '🇴🇲 عمان', flag: '🇴🇲' },
+            { code: '+965', country: '🇰🇼 الكويت', flag: '🇰🇼' },
+            { code: '+973', country: '🇧🇭 البحرين', flag: '🇧🇭' },
+            { code: '+962', country: '🇯🇴 الأردن', flag: '🇯🇴' },
+            { code: '+20', country: '🇪🇬 مصر', flag: '🇪🇬' },
+            { code: '+90', country: '🇹🇷 تركيا', flag: '🇹🇷' },
+            { code: '+1', country: '🇺🇸 الولايات المتحدة', flag: '🇺🇸' },
+            { code: '+44', country: '🇬🇧 بريطانيا', flag: '🇬🇧' },
+            { code: '+49', country: '🇩🇪 ألمانيا', flag: '🇩🇪' },
+            { code: '+33', country: '🇫🇷 فرنسا', flag: '🇫🇷' },
+            { code: '+61', country: '🇦🇺 أستراليا', flag: '🇦🇺' },
+            { code: '+81', country: '🇯🇵 اليابان', flag: '🇯🇵' },
+            { code: '+86', country: '🇨🇳 الصين', flag: '🇨🇳' },
+            { code: '+91', country: '🇮🇳 الهند', flag: '🇮🇳' },
+            { code: '+55', country: '🇧🇷 البرازيل', flag: '🇧🇷' },
+            { code: '+7', country: '🇷🇺 روسيا', flag: '🇷🇺' },
+            { code: '+34', country: '🇪🇸 إسبانيا', flag: '🇪🇸' },
+            { code: '+39', country: '🇮🇹 إيطاليا', flag: '🇮🇹' },
+            { code: '+27', country: '🇿🇦 جنوب أفريقيا', flag: '🇿🇦' },
+            { code: '+234', country: '🇳🇬 نيجيريا', flag: '🇳🇬' },
+            { code: '+92', country: '🇵🇰 باكستان', flag: '🇵🇰' },
+            { code: '+880', country: '🇧🇩 بنغلاديش', flag: '🇧🇩' },
+            { code: '+60', country: '🇲🇾 ماليزيا', flag: '🇲🇾' },
+            { code: '+63', country: '🇵🇭 الفلبين', flag: '🇵🇭' },
+            { code: '+84', country: '🇻🇳 فيتنام', flag: '🇻🇳' },
+            { code: '+82', country: '🇰🇷 كوريا الجنوبية', flag: '🇰🇷' },
+            { code: '+52', country: '🇲🇽 المكسيك', flag: '🇲🇽' },
+            { code: '+31', country: '🇳🇱 هولندا', flag: '🇳🇱' },
+            { code: '+32', country: '🇧🇪 بلجيكا', flag: '🇧🇪' },
+            { code: '+41', country: '🇨🇭 سويسرا', flag: '🇨🇭' },
+            { code: '+46', country: '🇸🇪 السويد', flag: '🇸🇪' },
+            { code: '+47', country: '🇳🇴 النرويج', flag: '🇳🇴' },
+            { code: '+45', country: '🇩🇰 الدنمارك', flag: '🇩🇰' },
+            { code: '+358', country: '🇫🇮 فنلندا', flag: '🇫🇮' },
+            { code: '+48', country: '🇵🇱 بولندا', flag: '🇵🇱' },
+            { code: '+30', country: '🇬🇷 اليونان', flag: '🇬🇷' },
+        ];
+
+        // ============================================================
+        // 🧠 المكون الرئيسي
+        // ============================================================
+        const App = () => {
+            // ===== حالة التطبيق =====
+            const [donors, setDonors] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [saving, setSaving] = useState(false);
+            const [selectedDonor, setSelectedDonor] = useState('');
+            const [selectedCountry, setSelectedCountry] = useState('+966'); // السعودية افتراضياً
+            const [phoneNumber, setPhoneNumber] = useState('');
+            const [searchTerm, setSearchTerm] = useState('');
+            const [toast, setToast] = useState(null);
+
+            // ===== المصادقة =====
+            const [currentUser, setCurrentUser] = useState(null);
+            const [showLogin, setShowLogin] = useState(true);
+            const [loginEmail, setLoginEmail] = useState('');
+            const [loginPassword, setLoginPassword] = useState('');
+            const [loginError, setLoginError] = useState('');
+            const [isLoginLoading, setIsLoginLoading] = useState(false);
+
+            // ===== عرض رسائل الإشعارات =====
+            const showToast = (message, type = 'info') => {
+                setToast({ message, type });
+                setTimeout(() => setToast(null), 3000);
+            };
+
+            // ===== جلب بيانات المساهمين من Firestore =====
+            useEffect(() => {
+                if (!currentUser) {
+                    setDonors([]);
+                    setLoading(false);
+                    return;
+                }
+
+                const donorsRef = db.collection('artifacts')
+                    .doc(APP_PATH)
+                    .collection('public')
+                    .doc('data')
+                    .collection('donors');
+
+                const unsubscribe = donorsRef.onSnapshot(
+                    (snapshot) => {
+                        const records = snapshot.docs.map(doc => ({
+                            id: doc.id,
+                            ...doc.data()
+                        }));
+
+                        // تصفية المساهمين (ليس زكاة)
+                        const contributors = records.filter(r => r.type !== 'zakat');
+                        setDonors(contributors);
+                        setLoading(false);
+                    },
+                    (error) => {
+                        console.error('خطأ في جلب المساهمين:', error);
+                        showToast('حدث خطأ في تحميل البيانات', 'error');
+                        setLoading(false);
+                    }
+                );
+
+                return () => unsubscribe();
+            }, [currentUser]);
+
+            // ===== معالجة اختيار المساهم =====
+            const handleDonorSelect = (e) => {
+                const donorId = e.target.value;
+                setSelectedDonor(donorId);
+
+                // البحث عن رقم الهاتف الحالي
+                const donor = donors.find(d => d.id === donorId);
+                if (donor) {
+                    const phone = donor.whatsappNumber || donor.phone || donor.mobile || '';
+                    // محاولة استخراج مفتاح الدولة من الرقم
+                    let countryCode = '+966';
+                    let rawNumber = phone;
+                    for (const country of COUNTRY_CODES) {
+                        if (phone.startsWith(country.code)) {
+                            countryCode = country.code;
+                            rawNumber = phone.substring(country.code.length);
+                            break;
+                        }
+                    }
+                    setSelectedCountry(countryCode);
+                    setPhoneNumber(rawNumber);
+                } else {
+                    setPhoneNumber('');
+                }
+            };
+
+            // ===== حفظ رقم الهاتف =====
+            const savePhoneNumber = async () => {
+                if (!selectedDonor) {
+                    showToast('الرجاء اختيار مساهم أولاً', 'error');
+                    return;
+                }
+
+                const fullNumber = selectedCountry + phoneNumber.trim();
+                if (phoneNumber.trim().length < 6) {
+                    showToast('الرجاء إدخال رقم هاتف صحيح (6 أرقام على الأقل)', 'error');
+                    return;
+                }
+
+                setSaving(true);
+                try {
+                    const donor = donors.find(d => d.id === selectedDonor);
+                    if (!donor) {
+                        showToast('المساهم غير موجود', 'error');
+                        return;
+                    }
+
+                    // تحديث في Firestore
+                    const donorRef = db.collection('artifacts')
+                        .doc(APP_PATH)
+                        .collection('public')
+                        .doc('data')
+                        .collection('donors')
+                        .doc(selectedDonor);
+
+                    await donorRef.update({
+                        whatsappNumber: fullNumber,
+                        phone: fullNumber,
+                        mobile: fullNumber,
+                        phoneUpdatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        phoneUpdatedBy: currentUser?.name || 'غير محدد'
+                    });
+
+                    showToast(`✅ تم تحديث رقم هاتف "${donor.name || 'المساهم'}" بنجاح`, 'success');
+
+                    // تحديث القائمة محلياً
+                    setDonors(prev => prev.map(d =>
+                        d.id === selectedDonor
+                            ? { ...d, whatsappNumber: fullNumber, phone: fullNumber, mobile: fullNumber }
+                            : d
+                    ));
+
+                } catch (error) {
+                    console.error('خطأ في حفظ الرقم:', error);
+                    showToast('❌ حدث خطأ في حفظ الرقم: ' + (error.message || 'خطأ غير معروف'), 'error');
+                } finally {
+                    setSaving(false);
+                }
+            };
+
+            // ===== تصفية المساهمين حسب البحث =====
+            const filteredDonors = useMemo(() => {
+                if (!searchTerm) return donors;
+                return donors.filter(d =>
+                    d.name &&
+                    d.name.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+            }, [donors, searchTerm]);
+
+            // ===== المساهم المحدد =====
+            const selectedDonorData = useMemo(() => {
+                return donors.find(d => d.id === selectedDonor);
+            }, [donors, selectedDonor]);
+
+            // ===== الحصول على الرقم الحالي =====
+            const currentPhone = selectedDonorData
+                ? (selectedDonorData.whatsappNumber || selectedDonorData.phone || selectedDonorData.mobile || '')
+                : '';
+
+            // ============================================================
+            // 🔐 شاشة تسجيل الدخول
+            // ============================================================
+            const handleLogin = async () => {
+                const email = loginEmail.trim();
+                if (!email || !loginPassword) {
+                    setLoginError('يرجى إدخال الإيميل وكلمة المرور');
+                    return;
+                }
+
+                setIsLoginLoading(true);
+                setLoginError('');
+
+                try {
+                    const credential = await auth.signInWithEmailAndPassword(email, loginPassword);
+
+                    // التحقق من صلاحية المشرف
+                    const adminDoc = await db.collection('admins').doc(credential.user.uid).get();
+                    if (!adminDoc.exists) {
+                        throw new Error('هذا الحساب غير مضاف ضمن المشرفين');
+                    }
+
+                    const adminData = adminDoc.data() || {};
+                    if (adminData.active !== true) {
+                        throw new Error('هذا الحساب غير مفعّل للإدارة');
+                    }
+
+                    setCurrentUser({
+                        uid: credential.user.uid,
+                        email: credential.user.email,
+                        name: adminData.name || credential.user.email || 'مشرف',
+                        role: adminData.role || 'مشرف',
+                        active: true
+                    });
+                    setShowLogin(false);
+                    showToast(`👋 مرحباً ${adminData.name || 'المشرف'}`, 'success');
+
+                } catch (error) {
+                    console.error('خطأ تسجيل الدخول:', error);
+                    let message = error.message || 'تعذر تسجيل الدخول';
+                    if (error.code === 'auth/invalid-login-credentials') {
+                        message = 'الإيميل أو كلمة المرور غير صحيحة';
+                    }
+                    setLoginError(message);
+                } finally {
+                    setIsLoginLoading(false);
+                }
+            };
+
+            // ===== التحقق من حالة المصادقة =====
+            useEffect(() => {
+                const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
+                    if (!firebaseUser) {
+                        setCurrentUser(null);
+                        setShowLogin(true);
+                        return;
+                    }
+
+                    try {
+                        const adminDoc = await db.collection('admins').doc(firebaseUser.uid).get();
+                        if (!adminDoc.exists) {
+                            throw new Error('حساب غير مصرح');
+                        }
+                        const adminData = adminDoc.data() || {};
+                        if (adminData.active !== true) {
+                            throw new Error('حساب غير مفعّل');
+                        }
+                        setCurrentUser({
+                            uid: firebaseUser.uid,
+                            email: firebaseUser.email,
+                            name: adminData.name || firebaseUser.email || 'مشرف',
+                            role: adminData.role || 'مشرف',
+                            active: true
+                        });
+                        setShowLogin(false);
+                    } catch (error) {
+                        console.error('خطأ في المصادقة:', error);
+                        setCurrentUser(null);
+                        setShowLogin(true);
+                        try { await auth.signOut(); } catch(e) {}
+                    }
+                });
+                return () => unsubscribe();
+            }, []);
+
+            // ============================================================
+            // 🎨 عرض الواجهة
+            // ============================================================
+
+            // 🔐 شاشة تسجيل الدخول
+            if (showLogin) {
+                return (
+                    <div className="min-h-screen flex items-center justify-center p-4" style={{
+                        background: 'linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%)'
+                    }}>
+                        <div className="bg-white rounded-3xl p-8 w-full max-w-sm shadow-xl border-t-4 border-[#2b6e9e]">
+                            <div className="text-center mb-6">
+                                <h2 className="text-2xl font-bold text-[#1c1c1e]">🔐 تسجيل الدخول</h2>
+                                <p className="text-[#8e8e93] text-sm mt-1">تحديث أرقام المساهمين</p>
+                            </div>
+
+                            {loginError && (
+                                <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm text-center mb-4">
+                                    {loginError}
+                                </div>
+                            )}
+
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-[#6c6c70] mb-1">الإيميل</label>
+                                    <input
+                                        type="email"
+                                        value={loginEmail}
+                                        onChange={e => setLoginEmail(e.target.value)}
+                                        onKeyPress={e => e.key === 'Enter' && handleLogin()}
+                                        placeholder="أدخل إيميل المشرف"
+                                        className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2b6e9e]"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-[#6c6c70] mb-1">كلمة المرور</label>
+                                    <input
+                                        type="password"
+                                        value={loginPassword}
+                                        onChange={e => setLoginPassword(e.target.value)}
+                                        onKeyPress={e => e.key === 'Enter' && handleLogin()}
+                                        placeholder="أدخل كلمة المرور"
+                                        className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2b6e9e]"
+                                    />
+                                </div>
+                                <button
+                                    onClick={handleLogin}
+                                    disabled={isLoginLoading}
+                                    className="w-full py-3 rounded-xl font-medium text-white transition-all"
+                                    style={{
+                                        background: 'linear-gradient(135deg, #2b6e9e 0%, #1e4a6e 100%)',
+                                        boxShadow: '0 4px 12px rgba(43, 110, 158, 0.3)'
+                                    }}
+                                >
+                                    {isLoginLoading ? 'جاري الدخول...' : 'تسجيل الدخول'}
+                                </button>
+                            </div>
+
+                            <div className="mt-6 pt-4 border-t text-center">
+                                <p className="text-[10px] text-[#8e8e93]">🔒 نظام آمن - مخصص للمشرفين فقط</p>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            // ============================================================
+            // 📱 الواجهة الرئيسية
+            // ============================================================
+            return (
+                <div className="main-card">
+                    {/* ===== الهيدر ===== */}
+                    <div className="header">
+                        <h1>📞 تحديث أرقام المساهمين</h1>
+                        <p>اختر المساهم وأضف رقم هاتفه</p>
+                        <div className="mt-2 text-xs text-[#8e8e93] bg-[#f5f5f7] p-2 rounded-xl">
+                            👤 {currentUser?.name} · {currentUser?.role}
+                        </div>
+                    </div>
+
+                    {/* ===== شريط البحث ===== */}
+                    <div className="form-group search-box">
+                        <span className="search-icon">🔍</span>
+                        <input
+                            type="text"
+                            placeholder="ابحث باسم المساهم..."
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                            className="form-control"
+                            style={{ paddingRight: '44px' }}
+                        />
+                    </div>
+
+                    {/* ===== قائمة المساهمين ===== */}
+                    <div className="form-group">
+                        <label className="form-label">👤 اختيار المساهم</label>
+                        <select
+                            className="form-control"
+                            value={selectedDonor}
+                            onChange={handleDonorSelect}
+                            disabled={loading || donors.length === 0}
+                        >
+                            <option value="">-- اختر مساهماً --</option>
+                            {filteredDonors.map(donor => (
+                                <option key={donor.id} value={donor.id}>
+                                    {donor.name || 'بدون اسم'}
+                                    {donor.whatsappNumber && ` 📱${donor.whatsappNumber}`}
+                                </option>
+                            ))}
+                        </select>
+
+                        {selectedDonorData && currentPhone && (
+                            <div className="mt-2">
+                                <span className="current-phone">
+                                    📱 الرقم الحالي: {currentPhone}
+                                </span>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* ===== حقل رقم الهاتف ===== */}
+                    <div className="form-group">
+                        <label className="form-label">📱 رقم الهاتف</label>
+                        <div className="phone-input-group">
+                            <select
+                                className="form-control country-code"
+                                value={selectedCountry}
+                                onChange={e => setSelectedCountry(e.target.value)}
+                            >
+                                {COUNTRY_CODES.map(country => (
+                                    <option key={country.code} value={country.code}>
+                                        {country.flag} {country.code}
+                                    </option>
+                                ))}
+                            </select>
+                            <input
+                                type="tel"
+                                className="form-control phone-number"
+                                placeholder="أدخل رقم الهاتف (مثال: 501234567)"
+                                value={phoneNumber}
+                                onChange={e => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
+                                dir="ltr"
+                                style={{ textAlign: 'left' }}
+                            />
+                        </div>
+                        <div className="text-xs text-[#8e8e93] mt-1">
+                            سيتم حفظ الرقم كاملاً: {selectedCountry}{phoneNumber || '___________'}
+                        </div>
+                    </div>
+
+                    {/* ===== عدد المساهمين ===== */}
+                    <div className="member-count">
+                        📊 إجمالي المساهمين: {donors.length} · 
+                        {filteredDonors.length !== donors.length && ` تم تصفية: ${filteredDonors.length}`}
+                    </div>
+
+                    {/* ===== زر الحفظ ===== */}
+                    <button
+                        className="btn-save"
+                        onClick={savePhoneNumber}
+                        disabled={saving || !selectedDonor}
+                    >
+                        {saving ? (
+                            <>
+                                <span className="spinner" style={{ display: 'inline-block' }}></span>
+                                جاري الحفظ...
+                            </>
+                        ) : (
+                            '💾 حفظ الرقم'
+                        )}
+                    </button>
+
+                    {/* ===== معلومات إضافية ===== */}
+                    <div className="divider"></div>
+
+                    <div className="text-center text-xs text-[#8e8e93] space-y-1">
+                        <p>✨ سيتم تحديث الرقم في لوحة التحكم الرئيسية</p>
+                        <p>📌 يمكن إرسال رسائل واتساب للمساهمين بعد تحديث الرقم</p>
+                        <p className="text-[10px] text-[#c6c6c8]">تطوير: عمرو مسعد الشجاع</p>
+                    </div>
+
+                    {/* ===== رسائل الإشعارات ===== */}
+                    {toast && (
+                        <div className={`toast toast-${toast.type}`}>
+                            {toast.message}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // ============================================================
+        // 🚀 تشغيل التطبيق
+        // ============================================================
+        const rootElement = document.getElementById('root');
+        if (rootElement) {
+            try {
+                const root = ReactDOM.createRoot(rootElement);
+                root.render(<App />);
+            } catch (error) {
+                console.error("خطأ في التصيير:", error);
+                rootElement.innerHTML = `
+                    <div style="padding: 40px; text-align: center; font-family: Arial, sans-serif;">
+                        <h2 style="color: #bc3f2e;">❌ حدث خطأ في تحميل التطبيق</h2>
+                        <p style="color: #666; margin-top: 10px;">يرجى تحديث الصفحة</p>
+                        <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 30px; background: #2b6e9e; color: white; border: none; border-radius: 8px; cursor: pointer;">تحديث</button>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
